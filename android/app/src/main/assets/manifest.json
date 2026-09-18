@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "models": [
+    {
+      "id": "llm",
+      "name": "Gemma 4 E2B",
+      "repo": "litert-community/gemma-4-E2B-it-litert-lm",
+      "file": "gemma-4-E2B-it.litertlm",
+      "url": "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm?download=true",
+      "sizeBytes": 2588147712,
+      "sha256": "181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c",
+      "version": 1
+    },
+    {
+      "id": "tts",
+      "name": "Kitten TTS Nano 0.8 int8",
+      "repo": "KittenML/kitten-tts-nano-0.8-int8",
+      "file": "kitten_tts_nano_v0_8.onnx",
+      "url": "https://huggingface.co/KittenML/kitten-tts-nano-0.8-int8/resolve/main/kitten_tts_nano_v0_8.onnx?download=true",
+      "sizeBytes": 24369971,
+      "sha256": "f7b0afcbee92870b32b8e0276d855b954dc25470c9f051b376ac7eee537c76fc",
+      "version": 1
+    },
+    {
+      "id": "asr-ggml",
+      "name": "Whisper Tiny EN q5_1",
+      "repo": "ggerganov/whisper.cpp",
+      "file": "ggml-tiny.en-q5_1.bin",
+      "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q5_1.bin?download=true",
+      "sizeBytes": 32166155,
+      "sha256": "c77c5766f1cef09b6b7d47f21b546cbddd4157886b3b5d6d4f709e91e66c7c2b",
+      "version": 1
+    },
+    {
+      "id": "asr-litert",
+      "name": "Whisper Tiny LiteRT",
+      "repo": "litert-community/whisper-tiny",
+      "file": "whisper_tiny_30s_f32.tflite",
+      "url": "https://huggingface.co/litert-community/whisper-tiny/resolve/main/whisper_tiny_30s_f32.tflite?download=true",
+      "sizeBytes": 150979184,
+      "sha256": "0c8f0e2a1855909a0c027b4ac3c586fdd299e2b47bf1a4fdab51191bca1e0e89",
+      "version": 1
+    },
+    {
+      "id": "vad",
+      "name": "Silero VAD v5.1.2",
+      "repo": "ggml-org/silero-v5.1.2",
+      "file": "ggml-silero-v5.1.2.bin",
+      "url": "https://huggingface.co/ggml-org/silero-v5.1.2/resolve/main/ggml-silero-v5.1.2.bin?download=true",
+      "sizeBytes": 885098,
+      "sha256": "29940d98d42b91fbd05ce489f3ecf7c72f0a42f027e4875919a28fb4c04ea2cf",
+      "version": 1
+    }
+  ]
+}
