@@ -48,7 +48,7 @@ export const darkPalette: Palette = {
   borderStrong: '#3A3F4E',
 
   gold: '#E8B86D',
-  coral: '#E17B63',
+  coral: '#040303',
   teal: '#6FBFA8',
   rose: '#C0596B',
   slate: '#5B6172',

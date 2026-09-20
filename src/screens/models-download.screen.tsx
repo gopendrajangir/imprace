@@ -11,6 +11,7 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Button, Icon, ProgressBar } from 'react-native-paper';
 import {
@@ -45,6 +46,8 @@ export const ModelsDownloadScreen: React.FC<Props> = () => {
     modelStates: initialStates,
     fetchStates,
   } = useGetModelsState();
+
+  console.log('Initial State', initialStates);
 
   const navigation = useNavigation<NavigationProp<RootStackParamsList>>();
 
@@ -130,6 +133,10 @@ export const ModelsDownloadScreen: React.FC<Props> = () => {
   };
 
   const downloadWithPermission = async () => {
+    if(Platform.OS === 'ios') {
+      downloadMissing(missing);
+      return;
+    }
     if (loadingRef.current) return;
     loadingRef.current = true;
 

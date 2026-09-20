@@ -161,7 +161,7 @@ const stylesFactory = themedStylesFactory(t =>
     card: {
       backgroundColor: t.surface1,
       borderRadius: 16,
-      borderWidth: StyleSheet.hairlineWidth,
+      borderWidth: 1,
       borderColor: t.border,
       padding: 14,
     },

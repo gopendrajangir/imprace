@@ -11,7 +11,7 @@ import {
   requestPermission as requestOne,
   type PermissionResult,
 } from '@/utils';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 type PermissionName = keyof typeof permissions;
 type Status = PermissionResult | 'unknown';
@@ -72,10 +72,13 @@ export const usePermissions = (names: PermissionName[]) => {
   }, [key]);
 
   useEffect(() => {
-    const focusSub = AppState.addEventListener('focus', state => {
-      if (state === 'active') {
-        checkPermissions();
-      }
+    const focusSub = Platform.select({
+      android: AppState.addEventListener('focus', state => {
+        if (state === 'active') {
+          checkPermissions();
+        }
+      }),
+      default: null,
     });
 
     const changeSub = AppState.addEventListener('change', state => {
@@ -85,7 +88,7 @@ export const usePermissions = (names: PermissionName[]) => {
     });
 
     return () => {
-      focusSub.remove();
+      focusSub?.remove();
       changeSub.remove();
     };
   }, []);

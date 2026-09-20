@@ -14,6 +14,7 @@ import {
   UserCamera,
   InterviewerControlsOverlay,
   InterviewerModel,
+  InterviewerVisualizer,
   UserControlsOverlay,
   ConfirmationModal,
 } from '@/components';
@@ -28,6 +29,7 @@ export const InterviewScreen: React.FC<Props> = ({ route }) => {
   const [showEndModal, setShowEndModal] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [showCaption, setShowCaption] = useState(true);
+  const [showModel, setShowModel] = useState(true); // avatar vs. visualizer
   const [ending, setEnding] = useState(false);
   const [stopped, setStopped] = useState(false);
 
@@ -129,17 +131,28 @@ export const InterviewScreen: React.FC<Props> = ({ route }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.main}>
         <View style={styles.voiceBlob}>
-          <InterviewerModel
-            phonemes={phonemes}
-            durationFrames={durationFrames}
-            isPlaying={isPlaying}
-            soundDuration={soundDuration}
-            micLevelSV={micLevelSV}
-          />
+          {showModel ? (
+            <InterviewerModel
+              phonemes={phonemes}
+              durationFrames={durationFrames}
+              isPlaying={isPlaying}
+              soundDuration={soundDuration}
+              micLevelSV={micLevelSV}
+            />
+          ) : (
+            <InterviewerVisualizer
+              active={isPlaying}
+              style={StyleSheet.absoluteFill}
+            />
+          )}
           <InterviewerControlsOverlay
             isCaptionsEnabled={showCaption}
             onToggleCaptions={() => {
               setShowCaption(v => !v);
+            }}
+            isModelVisible={showModel}
+            onToggleModel={() => {
+              setShowModel(v => !v);
             }}
             captionText={spokenText}
             interviewStartFailed={interviewStartStatus === 'failed'}
@@ -179,22 +192,6 @@ export const InterviewScreen: React.FC<Props> = ({ route }) => {
             transcribing={transcribeStatus === 'transcribing'}
           />
         </View>
-
-        {/* --- Debug panel for single-turn test - remove later --- */}
-        {/* <View style={styles.debug}>
-            <Text style={styles.debugText}>
-              sentences synth: {kittenResult.length} | played:{' '}
-              {kittenSoundResult.length} | playingIndex:{' '}
-              {playingIndex ?? 'none'} | progress: {soundProgress.toFixed(2)}
-            </Text>
-            <Text style={styles.debugText}>LLM Time: {llmInferenceTime}</Text>
-            <Text style={styles.debugText}>
-              Kitten Time: {kittenInferenceTime}
-            </Text>
-            <Text style={styles.debugText}>
-              Whisper Time: {whisperInferenceTime}
-            </Text>
-          </View> */}
       </View>
       <ConfirmationModal
         visible={!micGranted && !checkingPermission}
@@ -262,6 +259,7 @@ const stylesFactory = themedStylesFactory(t =>
     userContent: {
       flex: 1,
       borderTopWidth: 1,
+      borderColor: t.border,
     },
     debug: {
       position: 'absolute',

@@ -36,6 +36,8 @@ export const UserCamera: React.FC<Props> = React.memo(({ enabled }) => {
   // Only stream the preview when it's actually visible and permitted.
   const isActive = appActive && cameraGranted;
 
+  if (!enabled) return null;
+
   if (!cameraGranted) {
     return (
       <View
@@ -69,7 +71,7 @@ export const UserCamera: React.FC<Props> = React.memo(({ enabled }) => {
     );
   }
 
-  if (device == null || !enabled) {
+  if (device == null) {
     return (
       <View
         style={[

@@ -57,10 +57,14 @@ export const InterviewSetupContextProvider = ({
       await NitroWhisperML.loadVadModel(NitroFilesAPI.getModelPath(VAD_MODEL));
 
       if (Platform.OS === 'android') {
-        await NitroWhisperLiteRT.loadModel(
-          NitroFilesAPI.getModelPath(WHISPER_MODEL_LITERT),
-        );
-        setWhisperLiteRTLoaded(true);
+        try {
+          await NitroWhisperLiteRT.loadModel(
+            NitroFilesAPI.getModelPath(WHISPER_MODEL_LITERT),
+          );
+          setWhisperLiteRTLoaded(true);
+        } catch (error: any) {
+          console.log('Whisper LiteRT Error', error);
+        }
       }
 
       await NitroWhisperML.loadModel(

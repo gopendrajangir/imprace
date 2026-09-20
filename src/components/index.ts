@@ -7,3 +7,4 @@ export * from './audio-waveform.component';
 export * from './model-download-row.component';
 export * from './confirmation-model.component';
 export * from './bottom-anchored-scrollview.component';
+export * from './interviewer-visualizer.component';

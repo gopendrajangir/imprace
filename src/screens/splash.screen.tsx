@@ -1,196 +1,225 @@
-import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet, StatusBar } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from 'react-native-reanimated';
-import { useTheme, useThemedStyles } from '@/contexts';
-import { themedStylesFactory } from '@/utils';
-import { RootStackParamsList } from '@/navigation/navigation.types';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { palette } from '@/constants';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  NavigationProp,
-  StackActions,
-  useNavigation,
-} from '@react-navigation/native';
+  Animated,
+  BackHandler,
+  Easing,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { RootStackParamsList } from '@/navigation/navigation.types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 
-// adjust to your asset path
-const LOGO = require('@/assets/images/logo-person.png');
+import { themedStylesFactory } from '@/utils';
+import { useThemedStyles } from '@/contexts';
 
-const RISE = { duration: 900, easing: Easing.bezier(0.16, 1, 0.3, 1) };
-const LOGO_SIZE = 128;
+// Shortest time the splash stays up, so it never just flashes.
+const MIN_DURATION = 1200;
 
-type Props = NativeStackScreenProps<RootStackParamsList, 'Splash'>;
+// A five-bar voice waveform. `lo`/`hi` are the scaleY range each bar breathes
+// between; the centre bar is tallest and durations differ so it never looks
+// mechanical.
+const BARS = [
+  { lo: 0.3, hi: 0.55, duration: 700 },
+  { lo: 0.55, hi: 0.95, duration: 620 },
+  { lo: 0.7, hi: 1, duration: 800 },
+  { lo: 0.45, hi: 0.8, duration: 680 },
+  { lo: 0.25, hi: 0.5, duration: 760 },
+];
 
-export const SplashScreen: React.FC<Props> = () => {
-  const theme = useTheme();
-  const styles = useThemedStyles(stylesFactory);
-
-  const enter = useSharedValue(0);
-  const glow = useSharedValue(0);
+const Bar: React.FC<{
+  index: number;
+  lo: number;
+  hi: number;
+  duration: number;
+  style: object;
+}> = ({ index, lo, hi, duration, style }) => {
+  const grow = useRef(new Animated.Value(0)).current;
+  const wave = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    enter.value = withTiming(1, RISE);
-    glow.value = withRepeat(
-      withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.quad) }),
-      -1,
-      true,
+    const intro = Animated.timing(grow, {
+      toValue: 1,
+      duration: 500,
+      delay: index * 90,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    });
+
+    const breathe = Animated.loop(
+      Animated.sequence([
+        Animated.timing(wave, {
+          toValue: 1,
+          duration,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(wave, {
+          toValue: 0,
+          duration,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ]),
     );
-  }, [enter, glow]);
 
-  const stageStyle = useAnimatedStyle(() => ({
-    opacity: enter.value,
-    transform: [{ translateY: (1 - enter.value) * 24 }],
-  }));
-
-  const navigation = useNavigation<NavigationProp<RootStackParamsList>>();
-
-  useEffect(() => {
-    setTimeout(() => {
-      navigation.dispatch(StackActions.replace('ModelsDownload'));
-    }, 2000);
+    intro.start();
+    breathe.start();
+    return () => {
+      intro.stop();
+      breathe.stop();
+    };
   }, []);
 
-  return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.bg} />
-
-      <View style={styles.stage}>
-        <View style={styles.logoWrap}>
-          <Image source={LOGO} style={styles.logo} resizeMode="cover" />
-        </View>
-
-        <Animated.View style={stageStyle}>
-          <Text style={styles.wordmark}>
-            <Text style={styles.impr}>Impr</Text>
-            <Text>ace</Text>
-          </Text>
-
-          <Text style={styles.tagline}>Improve and Ace</Text>
-
-          <Dots color={theme.gold} />
-        </Animated.View>
-      </View>
-
-      <Text style={styles.footer}>SPEAK CONFIDENTLY</Text>
-    </View>
+  const scaleY = Animated.multiply(
+    grow,
+    wave.interpolate({ inputRange: [0, 1], outputRange: [lo, hi] }),
   );
+
+  return <Animated.View style={[style, { transform: [{ scaleY }] }]} />;
 };
 
-/** Three staggered pulsing dots. */
-const Dots = ({ color }: { color: string }) => (
-  <View style={dotStyles.row}>
-    {[0, 1, 2].map(i => (
-      <Dot key={i} color={color} delay={i * 200} />
-    ))}
-  </View>
-);
+export const SplashScreen: React.FC = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamsList>>();
+  const styles = useThemedStyles(stylesFactory);
 
-const Dot = ({ color, delay }: { color: string; delay: number }) => {
-  const v = useSharedValue(0);
+  const [ready, setReady] = useState(false);
+  const content = useRef(new Animated.Value(1)).current; // exit fade
+  const title = useRef(new Animated.Value(0)).current; // wordmark entrance
+  const [minElapsed, setMinElapsed] = useState(false);
+  const finished = useRef(false);
+
+  // Startup work goes here (read saved settings, check the model download...).
+  // The splash stays up until this flips `ready` to true.
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
+  // A splash shouldn't be dismissable.
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
-    v.value = withDelay(
-      delay,
-      withRepeat(
-        withSequence(
-          withTiming(1, { duration: 600, easing: Easing.inOut(Easing.quad) }),
-          withTiming(0, { duration: 600, easing: Easing.inOut(Easing.quad) }),
-        ),
-        -1,
-      ),
-    );
-  }, [delay, v]);
+    const intro = Animated.sequence([
+      Animated.delay(550),
+      Animated.timing(title, {
+        toValue: 1,
+        duration: 500,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]);
+    intro.start();
+    const timer = setTimeout(() => setMinElapsed(true), MIN_DURATION);
 
-  const style = useAnimatedStyle(() => ({
-    opacity: 0.35 + v.value * 0.65,
-    transform: [{ scale: 1 + v.value * 0.3 }],
-  }));
+    return () => {
+      intro.stop();
+      clearTimeout(timer);
+    };
+  }, []);
+
+  // Leave only when the minimum time has passed AND the app says it's ready.
+  useEffect(() => {
+    if (!minElapsed || !ready || finished.current) return;
+    finished.current = true;
+    Animated.timing(content, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => navigation.replace('ModelsDownload'));
+  }, [minElapsed, ready, navigation, content]);
+
+  const titleStyle = {
+    opacity: title,
+    transform: [
+      {
+        translateY: title.interpolate({
+          inputRange: [0, 1],
+          outputRange: [10, 0],
+        }),
+      },
+    ],
+  };
 
   return (
-    <Animated.View style={[dotStyles.dot, { backgroundColor: color }, style]} />
+    // The background stays solid while only the content fades, so no window
+    // colour shows through during the transition.
+    <View style={styles.container} accessibilityLabel="Imprace">
+      <Animated.View style={[styles.content, { opacity: content }]}>
+        <View style={styles.bars}>
+          {BARS.map((bar, i) => (
+            <Bar key={i} index={i} style={styles.bar} {...bar} />
+          ))}
+        </View>
+
+        <Animated.View style={[styles.textBlock, titleStyle]}>
+          <Text style={styles.wordmark}>
+            Impr<Text style={styles.wordmarkAccent}>ace</Text>
+          </Text>
+          <Text style={styles.tagline}>Practice interviews out loud.</Text>
+        </Animated.View>
+      </Animated.View>
+    </View>
   );
 };
 
 const stylesFactory = themedStylesFactory(t =>
   StyleSheet.create({
-    root: {
+    container: {
+      flex: 1,
+      backgroundColor: t.bg,
+    },
+    content: {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: palette.bg,
     },
-    stage: {
+    bars: {
+      height: 72,
+      flexDirection: 'row',
       alignItems: 'center',
+      gap: 8,
     },
-    logoWrap: {
-      width: LOGO_SIZE,
-      height: LOGO_SIZE,
-      marginBottom: 34,
+    bar: {
+      width: 8,
+      height: 72,
+      borderRadius: 4,
+      backgroundColor: t.gold,
+    },
+    textBlock: {
+      marginTop: 36,
       alignItems: 'center',
-      justifyContent: 'center',
-    },
-    glow: {
-      position: 'absolute',
-      width: LOGO_SIZE * 1.9,
-      height: LOGO_SIZE * 1.9,
-      borderRadius: LOGO_SIZE,
-      backgroundColor: t.textPrimary,
-    },
-    logo: {
-      width: LOGO_SIZE,
-      height: LOGO_SIZE,
-      borderRadius: 30, // iOS squircle-ish
     },
     wordmark: {
-      fontSize: 44,
-      fontWeight: '800',
-      letterSpacing: -0.5,
-      textAlign: 'center',
+      fontSize: 34,
+      fontWeight: '700',
+      letterSpacing: -0.8,
       color: t.textPrimary,
     },
-    impr: {
+    wordmarkAccent: {
       color: t.gold,
-    },
-    ai: {
-      fontWeight: '600',
-      color: t.textSecondary,
     },
     tagline: {
       marginTop: 8,
-      fontSize: 16,
-      fontWeight: '500',
-      letterSpacing: 0.4,
-      textAlign: 'center',
+      fontSize: 14,
+      letterSpacing: 0.2,
       color: t.textSecondary,
-    },
-    footer: {
-      position: 'absolute',
-      bottom: 40,
-      fontSize: 12,
-      letterSpacing: 2,
-      fontWeight: '600',
-      color: t.textMuted,
     },
   }),
 );
 
-const dotStyles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    gap: 8,
-    justifyContent: 'center',
-    marginTop: 40,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-});
+/* ---------------------------------------------------------------------------
+ * Usage: register it as the first route in your stack.
+ *
+ * <Stack.Screen
+ *   name="Splash"
+ *   component={SplashScreen}
+ *   options={{ headerShown: false, animation: 'fade' }}
+ * />
+ *
+ * and add `Splash: undefined;` to RootStackParamsList.
+ * ------------------------------------------------------------------------- */

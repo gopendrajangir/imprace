@@ -16,9 +16,7 @@ const Stack = createNativeStackNavigator<RootStackParamsList>();
 
 function RootStack() {
   return (
-    <Stack.Navigator
-      screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
-    >
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="ModelsDownload" component={ModelsDownloadScreen} />
       <Stack.Screen name="Interview" component={InterviewScreen} />

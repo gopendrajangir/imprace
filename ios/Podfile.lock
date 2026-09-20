@@ -1499,6 +1499,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-document-picker (12.0.2):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-filament (1.11.0):
     - hermes-engine
     - RCTRequired
@@ -2669,6 +2691,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - React-mutationobservernativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver`)
+  - "react-native-document-picker (from `../node_modules/@react-native-documents/picker`)"
   - react-native-filament (from `../node_modules/react-native-filament`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-skia (from `../node_modules/@shopify/react-native-skia`)"
@@ -2809,6 +2832,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   React-mutationobservernativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/mutationobserver"
+  react-native-document-picker:
+    :path: "../node_modules/@react-native-documents/picker"
   react-native-filament:
     :path: "../node_modules/react-native-filament"
   react-native-safe-area-context:
@@ -2911,7 +2936,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   FBLazyVector: 3c3be9a019176b5699455f7f66c5444b78a411c6
   hermes-engine: 4f0cccfe23d85e99a5118c5ca9b249b42e37d4fc
-  NitroAkkiAi: 5fdd5e837b0d3cde868defdb6290883787ebb46f
+  NitroAkkiAi: cdf705f9d38c1a8e9355a712aa3dea6c0fdda2b6
   NitroImage: 5daf897d2f37ed419186278d6b0fcdd8aab313b0
   NitroModules: cda827b31eb05c1bfcc0e2bbd9b647a69c6c314f
   onnxruntime-c: c0dec5145726abb39706aac7dff720d37549c7db
@@ -2952,6 +2977,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 44dd007f917e2396afa0e70bbd70273237d93fde
   React-microtasksnativemodule: f413ee411341fb3c34d20e85e9f6f524921fab15
   React-mutationobservernativemodule: 58f6d2adf7d98e72b241608dfa2ddce414d2a4e7
+  react-native-document-picker: c3a7536f3ee52525b4714c3720537f941d0cb094
   react-native-filament: 6e7150ea9d7a2f9a7c0579761d0e1473fcf618ba
   react-native-safe-area-context: 8368d1052ccc8fe8725adfb6a83498c8bdb48250
   react-native-skia: 9f1f9bfd9e3c6139711296c4ee6cb367931fb306

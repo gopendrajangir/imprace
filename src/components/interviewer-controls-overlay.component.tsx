@@ -13,7 +13,9 @@ interface InterviewerControlsOverlayProps {
   synthesizeError: string | null;
   llmError: string | null;
   stopped?: boolean;
+  isModelVisible: boolean;
 
+  onToggleModel: () => void;
   onRetryStartInterview: () => void;
   onToggleCaptions: () => void;
 
@@ -30,6 +32,8 @@ export const InterviewerControlsOverlay = ({
   synthesizeError,
   llmError,
   stopped,
+  isModelVisible,
+  onToggleModel,
 
   onRetryStartInterview,
   onToggleCaptions,
@@ -80,16 +84,33 @@ export const InterviewerControlsOverlay = ({
     return () => clearTimeout(id);
   }, [toastMessage]);
 
+  const modelToggleTimeRef = useRef(Date.now());
+
+  const onToggleModelCallback = () => {
+    if(modelToggleTimeRef.current - Date.now() >= 2000){
+      modelToggleTimeRef.current = Date.now()
+      onToggleModel();
+    }
+  }
+
   return (
     <View style={[styles.container, style]} pointerEvents="box-none">
-      <IconButton
-        icon={isCaptionsEnabled ? 'closed-caption' : 'closed-caption-outline'}
-        iconColor={theme.textPrimary}
-        containerColor={theme.surface2}
-        size={22}
-        style={styles.captionToggle}
-        onPress={onToggleCaptions}
-      />
+      <View style={styles.btnsContainer}>
+        <IconButton
+          icon={isCaptionsEnabled ? 'closed-caption' : 'closed-caption-outline'}
+          iconColor={theme.textPrimary}
+          containerColor={theme.surface2}
+          size={22}
+          onPress={onToggleCaptions}
+        />
+        <IconButton
+          icon={isModelVisible ? 'cube-outline' : 'waveform'}
+          onPress={onToggleModelCallback}
+          iconColor={theme.textPrimary}
+          containerColor={theme.surface2}
+          size={22}
+        />
+      </View>
 
       {toastMessage && !stopped && (
         <View style={styles.toast} pointerEvents="none">
@@ -133,7 +154,7 @@ const stylesFactory = themedStylesFactory(t =>
       width: '100%',
       height: '100%',
     },
-    captionToggle: {
+    btnsContainer: {
       position: 'absolute',
       top: 8,
       right: 8,
