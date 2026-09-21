@@ -29,7 +29,8 @@ import { useGetModelsState, useNotificationsPermission } from '@/hooks';
 
 import { NitroDownloadManager, NitroFilesAPI } from 'react-native-akki-ai';
 import type { DownloadState } from 'react-native-akki-ai/lib/specs/DownloadManager.nitro';
-import { ModelDownloadRow, ConfirmationModal } from '@/components';
+import { ModelDownloadRow, ConfirmationModal, ConsentLine } from '@/components';
+import { AsyncStorage, NotificationAskedKey } from '@/constants';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'ModelsDownload'>;
 
@@ -47,14 +48,12 @@ export const ModelsDownloadScreen: React.FC<Props> = () => {
     fetchStates,
   } = useGetModelsState();
 
-  console.log('Initial State', initialStates);
-
   const navigation = useNavigation<NavigationProp<RootStackParamsList>>();
 
   const theme = useTheme();
   const styles = useThemedStyles(stylesFactory);
 
-  const { requestNotificationsPermission, checkNotificationsPermission } =
+  const { requestNotificationsPermission, shouldShowConsentModal } =
     useNotificationsPermission();
 
   useEffect(() => {
@@ -133,19 +132,22 @@ export const ModelsDownloadScreen: React.FC<Props> = () => {
   };
 
   const downloadWithPermission = async () => {
-    if(Platform.OS === 'ios') {
+    if (Platform.OS === 'ios') {
       downloadMissing(missing);
       return;
     }
     if (loadingRef.current) return;
     loadingRef.current = true;
 
-    const status = await checkNotificationsPermission();
-    if (status === 'blocked') {
-      downloadMissing(missing);
-    } else {
+    const shouldShowModal = await shouldShowConsentModal();
+
+    if (shouldShowModal) {
+      await AsyncStorage.setItem(NotificationAskedKey, 'asked');
       setShowNotificationsPermissionModel(true);
+    } else {
+      downloadMissing(missing);
     }
+
     loadingRef.current = false;
   };
 
@@ -268,6 +270,7 @@ export const ModelsDownloadScreen: React.FC<Props> = () => {
             </Button>
           </>
         )}
+        <ConsentLine />
       </View>
       <ConfirmationModal
         visible={showNotificationsPermissionModel}
@@ -344,7 +347,8 @@ const stylesFactory = themedStylesFactory(t =>
     },
     footer: {
       padding: 20,
-      paddingBottom: 28,
+      paddingTop: 10,
+      paddingBottom: 0,
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: t.border,
       backgroundColor: t.bg,

@@ -33,8 +33,8 @@ export const InterviewerControlsOverlay = ({
   llmError,
   stopped,
   isModelVisible,
-  onToggleModel,
 
+  onToggleModel,
   onRetryStartInterview,
   onToggleCaptions,
   style,
@@ -87,11 +87,11 @@ export const InterviewerControlsOverlay = ({
   const modelToggleTimeRef = useRef(Date.now());
 
   const onToggleModelCallback = () => {
-    if(modelToggleTimeRef.current - Date.now() >= 2000){
-      modelToggleTimeRef.current = Date.now()
+    if (Date.now() - modelToggleTimeRef.current >= 1000) {
+      modelToggleTimeRef.current = Date.now();
       onToggleModel();
     }
-  }
+  };
 
   return (
     <View style={[styles.container, style]} pointerEvents="box-none">

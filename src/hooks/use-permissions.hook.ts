@@ -12,6 +12,7 @@ import {
   type PermissionResult,
 } from '@/utils';
 import { AppState, Platform } from 'react-native';
+import { AsyncStorage, NotificationAskedKey } from '@/constants';
 
 type PermissionName = keyof typeof permissions;
 type Status = PermissionResult | 'unknown';
@@ -117,9 +118,17 @@ export const usePermissions = (names: PermissionName[]) => {
 };
 
 export const useNotificationsPermission = () => {
-  const checkNotificationsPermission = async () => {
+  const shouldShowConsentModal = async () => {
+    const askedValue = await AsyncStorage.getItem(NotificationAskedKey);
     const result = await checkNotifications();
-    return toResult(result.status);
+
+    const status = toResult(result.status);
+
+    if (askedValue === 'asked' || status === 'granted') {
+      return false;
+    }
+
+    return true;
   };
 
   const requestNotificationsPermission = async () => {
@@ -127,5 +136,5 @@ export const useNotificationsPermission = () => {
     return toResult(result.status);
   };
 
-  return { requestNotificationsPermission, checkNotificationsPermission };
+  return { requestNotificationsPermission, shouldShowConsentModal };
 };

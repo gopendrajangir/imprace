@@ -28,6 +28,7 @@ import { RootStackParamsList } from '@/navigation/navigation.types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { LegalFooter } from '@/components';
 
 export type Mode = 'easy' | 'balanced' | 'ruthless';
 
@@ -159,7 +160,7 @@ export const InterviewStarterScreen: React.FC<Props> = () => {
   };
 
   return (
-    <SafeAreaView style={styles.root} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.root}>
       <KeyboardAvoidingView style={styles.container} behavior={'padding'}>
         <ScrollView
           contentContainerStyle={styles.scroll}
@@ -345,6 +346,7 @@ export const InterviewStarterScreen: React.FC<Props> = () => {
           >
             {isParsingResume ? 'Parsing resume…' : 'Start interview'}
           </Button>
+          <LegalFooter />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -452,7 +454,7 @@ const stylesFactory = themedStylesFactory(t =>
     footer: {
       paddingHorizontal: 20,
       paddingTop: 12,
-      paddingBottom: 20,
+      paddingBottom: 0,
       borderTopWidth: 1,
       borderTopColor: t.border,
       backgroundColor: t.bg,

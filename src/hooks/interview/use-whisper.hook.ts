@@ -22,13 +22,13 @@ export const useWhisper = ({ isRecording }: UseWhisperOptions) => {
     setTranscribeStatus('transcribing');
     try {
       startTimeRef.current = Date.now();
-      let raw = '';
+      let raw: string | null = '';
 
       let whisperLiteRTWorked = false;
 
       if (Platform.OS === 'android') {
         try {
-          raw = await NitroWhisperLiteRT.transcribe(samples);
+          raw = (await NitroWhisperLiteRT?.transcribe(samples)) ?? null;
           whisperLiteRTWorked = true;
         } catch (err) {
           console.log('Whisper LiteRT', err);
@@ -40,8 +40,6 @@ export const useWhisper = ({ isRecording }: UseWhisperOptions) => {
       }
 
       setInferenceTime((Date.now() - startTimeRef.current) / 1000);
-
-      console.log('Raw', raw);
 
       setTranscribeStatus('finished');
       setTranscribedText(raw?.trim() ?? '');

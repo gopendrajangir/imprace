@@ -1,3 +1,4 @@
+import { createAsyncStorage } from '@react-native-async-storage/async-storage/jest';
 import { Platform } from 'react-native';
 
 export const WHISPER_MODEL_GGML = 'ggml-tiny.en-q5_1.bin';
@@ -12,3 +13,8 @@ export const MODEL_IDS = Platform.select({
   ios: ['llm', 'tts', 'asr', 'vad'],
   default: ['llm', 'tts', 'asr', 'vad'],
 });
+
+export const WEB_LINK_BASE = 'https://gopendrajangir.github.io/imprace-web';
+export const NotificationAskedKey = 'notifications_asked';
+
+export const AsyncStorage = createAsyncStorage('imprace');
