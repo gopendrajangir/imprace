@@ -177,7 +177,7 @@ export const InterviewStarterScreen: React.FC<Props> = () => {
             label="Your name"
             value={name}
             onChangeText={setName}
-            placeholder="e.g. Gopendra"
+            placeholder="e.g. John"
             style={styles.input}
             returnKeyType="next"
             textColor={theme.textPrimary}
@@ -196,7 +196,7 @@ export const InterviewStarterScreen: React.FC<Props> = () => {
             label="Role"
             value={role}
             onChangeText={setRole}
-            placeholder="e.g. Senior React Native Engineer"
+            placeholder="e.g. Senior Product Manager"
             style={styles.input}
             returnKeyType="next"
             textColor={theme.textPrimary}

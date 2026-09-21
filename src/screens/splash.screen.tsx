@@ -15,7 +15,7 @@ import { themedStylesFactory } from '@/utils';
 import { useThemedStyles } from '@/contexts';
 
 // Shortest time the splash stays up, so it never just flashes.
-const MIN_DURATION = 1200;
+const MIN_DURATION = 2200;
 
 // A five-bar voice waveform. `lo`/`hi` are the scaleY range each bar breathes
 // between; the centre bar is tallest and durations differ so it never looks
