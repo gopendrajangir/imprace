@@ -144,12 +144,14 @@ const TUNING = {
 
 interface UserInterviewerModelRenderCallbackOptions {
   isPlayingSV: ISharedValue<boolean>;
+  isPausedSV: ISharedValue<boolean>;
   micLevelSV: ISharedValue<number>;
   timelineSV: ISharedValue<VisemeCue[]>;
 }
 
 export const useInterviewerModel = ({
   isPlayingSV,
+  isPausedSV,
   micLevelSV,
   timelineSV,
 }: UserInterviewerModelRenderCallbackOptions) => {
@@ -167,6 +169,7 @@ export const useInterviewerModel = ({
   const speechStartTimeSV = useSharedValue(0);
   const prevIsPlayingSV = useSharedValue(false);
   const cueIndexSV = useSharedValue(0);
+  const pausedAccumSV = useSharedValue(0);
 
   const smoothed = useMemo(
     () => Object.fromEntries(MORPH_KEYS.map(k => [k, 0])),
@@ -371,13 +374,22 @@ export const useInterviewerModel = ({
       if (isPlayingSV.value && !prevIsPlayingSV.value) {
         speechStartTimeSV.value = elapsedTimeSV.value;
         cueIndexSV.value = 0;
+        pausedAccumSV.value = 0;
       }
       prevIsPlayingSV.value = isPlayingSV.value;
+
+      // Freeze the speech clock while paused: count this frame as paused time so
+      // audioElapsed stops advancing and the current viseme holds. Idle
+      // blink/gaze (driven by elapsedTimeSV) keep running untouched.
+      if (isPlayingSV.value && isPausedSV.value) {
+        pausedAccumSV.value += dt;
+      }
 
       let targetViseme = 'sil';
       const cues = timelineSV.value;
       if (isPlayingSV.value && cues != null && cues.length > 0) {
-        const audioElapsed = elapsedTimeSV.value - speechStartTimeSV.value;
+        const audioElapsed =
+          elapsedTimeSV.value - speechStartTimeSV.value - pausedAccumSV.value;
         while (
           cueIndexSV.value < cues.length - 1 &&
           audioElapsed >= cues[cueIndexSV.value].endSec

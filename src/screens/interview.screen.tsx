@@ -51,6 +51,7 @@ export const InterviewScreen: React.FC<Props> = ({ route }) => {
     transcribeError,
 
     isPlaying,
+    isPaused,
     playingIndex,
     soundProgress,
     kittenResult,
@@ -67,6 +68,7 @@ export const InterviewScreen: React.FC<Props> = ({ route }) => {
     setIsManualRecording,
     startRecording,
     stopRecording,
+    resume,
   } = useInterviewFlow(stopped);
 
   const { requestPermissions, checkPermissions, statuses } = usePermissions([
@@ -136,6 +138,7 @@ export const InterviewScreen: React.FC<Props> = ({ route }) => {
               phonemes={phonemes}
               durationFrames={durationFrames}
               isPlaying={isPlaying}
+              isPaused={isPaused}
               soundDuration={soundDuration}
               micLevelSV={micLevelSV}
             />
@@ -159,10 +162,12 @@ export const InterviewScreen: React.FC<Props> = ({ route }) => {
             onRetryStartInterview={() => {
               startInterview(userInfo, systemPrompt, overwriteSystemPrompt);
             }}
+            onContinue={resume}
             soundPlayError={soundPlayError}
             synthesizeError={synthesizeError}
             llmError={llmError}
             stopped={stopped}
+            isPaused={isPaused}
             style={styles.controlsOverlay}
           />
         </View>

@@ -18,20 +18,24 @@ interface InterviewerModelProps {
   durationFrames?: number[] | null;
   soundDuration?: number | null;
   isPlaying: boolean;
+  isPaused: boolean;
   micLevelSV: ISharedValue<number>;
 }
 
 const Scene = ({
   timelineSV,
   isPlayingSV,
+  isPausedSV,
   micLevelSV,
 }: {
   timelineSV: ISharedValue<VisemeCue[]>;
   isPlayingSV: ISharedValue<boolean>;
+  isPausedSV: ISharedValue<boolean>;
   micLevelSV: ISharedValue<number>;
 }) => {
   const { model, renderCallback } = useInterviewerModel({
     isPlayingSV,
+    isPausedSV,
     timelineSV,
     micLevelSV,
   });
@@ -51,10 +55,12 @@ export const InterviewerModel = React.memo(
     durationFrames,
     soundDuration,
     isPlaying,
+    isPaused,
     micLevelSV,
   }: InterviewerModelProps) => {
     const timelineSV = useSharedValue<VisemeCue[]>([]);
     const isPlayingSV = useSharedValue(false);
+    const isPausedSV = useSharedValue(false);
 
     const builtTimeline = useMemo(() => {
       if (!phonemes || !durationFrames || !soundDuration) return [];
@@ -66,8 +72,9 @@ export const InterviewerModel = React.memo(
     }, [builtTimeline, timelineSV]);
 
     useEffect(() => {
-      isPlayingSV.value = !!isPlaying;
-    }, [isPlaying, isPlayingSV]);
+      isPlayingSV.value = isPlaying;
+      isPausedSV.value = isPaused;
+    }, [isPlaying, isPlayingSV, isPaused, isPausedSV]);
 
     return (
       <View style={styles.container}>
@@ -81,6 +88,7 @@ export const InterviewerModel = React.memo(
             micLevelSV={micLevelSV}
             timelineSV={timelineSV}
             isPlayingSV={isPlayingSV}
+            isPausedSV={isPausedSV}
           />
         </FilamentScene>
       </View>

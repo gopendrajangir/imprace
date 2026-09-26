@@ -15,4 +15,5 @@ export type RootStackParamsList = {
     candidateInfo: CandidateInfo;
   };
   InterviewAnalysis: undefined;
+  Profiler: undefined;
 };

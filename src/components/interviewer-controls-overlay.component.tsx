@@ -14,10 +14,12 @@ interface InterviewerControlsOverlayProps {
   llmError: string | null;
   stopped?: boolean;
   isModelVisible: boolean;
+  isPaused: boolean;
 
   onToggleModel: () => void;
   onRetryStartInterview: () => void;
   onToggleCaptions: () => void;
+  onContinue: () => void;
 
   style?: StyleProp<ViewStyle>;
 }
@@ -33,10 +35,13 @@ export const InterviewerControlsOverlay = ({
   llmError,
   stopped,
   isModelVisible,
+  isPaused,
 
   onToggleModel,
   onRetryStartInterview,
   onToggleCaptions,
+  onContinue,
+
   style,
 }: InterviewerControlsOverlayProps) => {
   const styles = useThemedStyles(stylesFactory);
@@ -135,6 +140,22 @@ export const InterviewerControlsOverlay = ({
         </View>
       )}
 
+      {isPaused && !interviewStartFailed && (
+        <View style={styles.centerContinue} pointerEvents="box-none">
+          <Button
+            mode="contained"
+            icon="play"
+            onPress={onContinue}
+            buttonColor={theme.teal}
+            textColor={readableOn(theme.teal, theme)}
+            style={styles.continueButton}
+            labelStyle={styles.continueButtonLabel}
+          >
+            Continue
+          </Button>
+        </View>
+      )}
+
       {showCaption && (
         <BottomAnchoredScrollView
           style={styles.captionBox}
@@ -197,6 +218,22 @@ const stylesFactory = themedStylesFactory(t =>
     },
     retryButton: {
       alignSelf: 'center',
+    },
+    centerContinue: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 24,
+    },
+    continueButton: {
+      alignSelf: 'center',
+    },
+    continueButtonLabel: {
+      fontSize: 15,
     },
     captionBox: {
       position: 'absolute',

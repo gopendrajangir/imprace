@@ -11,6 +11,7 @@ import {
   SplashScreen,
 } from '../screens';
 import { RootStackParamsList } from './navigation.types';
+import ProfilerScreen from '@/screens/profiler.screen';
 
 const Stack = createNativeStackNavigator<RootStackParamsList>();
 
@@ -29,6 +30,7 @@ function RootStack() {
         name="InterviewAnalysis"
         component={InterviewAnalysisScreen}
       />
+      <Stack.Screen name="Profiler" component={ProfilerScreen} />
     </Stack.Navigator>
   );
 }

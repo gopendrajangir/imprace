@@ -6194,6 +6194,13 @@ react-is@^19.1.0, react-is@^19.2.3:
 react-native-akki-ai@../react-native-akki-ai:
   version "0.0.1"
 
+react-native-audio-api@^0.13.5:
+  version "0.13.5"
+  resolved "https://registry.yarnpkg.com/react-native-audio-api/-/react-native-audio-api-0.13.5.tgz#bdc8983e6b874e797f4258d76820fb5eda763238"
+  integrity sha512-x/Sv07w7Yavj66gZtpedrLjJLeME048cEYUuzrYC/wydWenNXOTnygYUJPZe0NjXkfjzuiLjuRliqXEJodjmKA==
+  dependencies:
+    semver "^7.7.3"
+
 react-native-filament@^1.11.0:
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/react-native-filament/-/react-native-filament-1.11.0.tgz#dae51d65fa7e16490aeb7a1de5dd1bd9b2b395da"

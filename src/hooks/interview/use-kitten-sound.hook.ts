@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Sound from 'react-native-sound';
+import { AudioContext, AudioManager } from 'react-native-audio-api';
+import type {
+  AudioBuffer,
+  AudioBufferSourceNode,
+} from 'react-native-audio-api';
 import { KittenResult } from './use-kitten-tts.hook';
 
 export type SoundStatus = 'idle' | 'playing' | 'finished' | 'failed';
 
-// One playback outcome per kitten result we consumed, in play order.
 export interface KittenSoundResult {
-  index: number; // matches KittenResult.index, for correlation/caption sync
-  played: boolean; // true if it actually played to completion
+  index: number;
+  played: boolean;
   sentence: string;
 }
 
@@ -19,6 +22,15 @@ interface UseSoundOptions {
   stopped: boolean;
 }
 
+// Must run BEFORE any AudioContext is created (module load is fine).
+// playAndRecord + defaultToSpeaker => phone loudspeaker/mic by default;
+// allowBluetooth lets a connected headset take over automatically (Goal 1).
+AudioManager.setAudioSessionOptions({
+  iosCategory: 'playAndRecord',
+  iosMode: 'spokenAudio',
+  iosOptions: ['defaultToSpeaker', 'allowBluetoothHFP', 'allowAirPlay'],
+});
+
 export const useKittenSound = ({
   kittenResult,
   resetTrigger,
@@ -27,22 +39,22 @@ export const useKittenSound = ({
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-
+  const [isPaused, setIsPaused] = useState(false);
   const [playingIndex, setPlayingIndex] = useState<number>(-1);
-
   const [kittenSoundResult, setKittenSoundResult] = useState<
     KittenSoundResult[]
   >([]);
 
-  const soundRef = useRef<Sound | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const stoppedRef = useRef(false);
+  const ctxRef = useRef<AudioContext | null>(null);
+  if (!ctxRef.current) ctxRef.current = new AudioContext();
 
+  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const manualStopRef = useRef(false);
+
+  const stoppedRef = useRef(false);
   stoppedRef.current = stopped;
 
-  // Same consumer machinery as the TTS hook: a cursor into kittenResult, a
-  // one-at-a-time guard, and a live ref so the async loop always reads the
-  // latest array (avoids the stale-closure bug).
   const indexRef = useRef(0);
   const isPlayingRef = useRef(false);
   const kittenResultRef = useRef(kittenResult);
@@ -56,55 +68,69 @@ export const useKittenSound = ({
   }, []);
 
   const playOne = useCallback(
-    (wavPath: string): Promise<boolean> => {
-      return new Promise(resolve => {
-        clearTimer();
-        soundRef.current?.release();
-        soundRef.current = null;
+    (wavPath: string): Promise<boolean> =>
+      new Promise(async resolve => {
+        const ctx = ctxRef.current;
+        if (!ctx) return resolve(false);
 
-        const sound = new Sound(wavPath, '', err => {
-          if (err) {
-            resolve(false);
-            return;
-          }
-          soundRef.current = sound;
-          const dur = sound.getDuration();
-          setDuration(dur);
+        clearTimer();
+        let settled = false;
+        const finish = (ok: boolean) => {
+          if (settled) return;
+          settled = true;
+          clearTimer();
+          sourceRef.current = null;
+          setIsPlaying(false);
+          resolve(ok);
+        };
+
+        try {
+          // decodeAudioData(path) on current versions; older builds expose
+          // ctx.decodeAudioDataSource(path). buffer.duration is exact (Goal 3).
+          const buffer: AudioBuffer = await ctx.decodeAudioData(wavPath);
+          if (stoppedRef.current) return finish(false);
+
+          setDuration(buffer.duration);
           setProgress(0);
+
+          const source = ctx.createBufferSource(); // (on web: await this)
+          source.buffer = buffer;
+          source.connect(ctx.destination);
+          sourceRef.current = source;
+
+          if (ctx.state === 'suspended') await ctx.resume();
+
+          const startedAt = ctx.currentTime;
+          manualStopRef.current = false;
+
+          source.onEnded = () => {
+            setProgress(1);
+            finish(!manualStopRef.current); // stop() => played:false
+          };
+
+          source.start(startedAt);
           setIsPlaying(true);
+          setIsPaused(false);
 
           timerRef.current = setInterval(() => {
-            sound.getCurrentTime(seconds => {
-              if (dur > 0 && soundRef.current) {
-                setProgress(Math.min(seconds / dur, 1));
-              }
-            });
+            const c = ctxRef.current;
+            if (!c || buffer.duration <= 0) return;
+            const elapsed = c.currentTime - startedAt; // frozen while suspended
+            setProgress(Math.min(Math.max(elapsed / buffer.duration, 0), 1));
           }, PROGRESS_INTERVAL_MS);
-
-          if (!stoppedRef.current) {
-            sound.play(success => {
-              soundRef.current = null;
-              clearTimer();
-              setIsPlaying(false);
-              setProgress(1);
-              sound.release();
-              resolve(success);
-            });
-          }
-        });
-      });
-    },
+        } catch {
+          finish(false);
+        }
+      }),
     [clearTimer],
   );
 
   const processNext = useCallback(async () => {
     const results = kittenResultRef.current;
-
     if (isPlayingRef.current) return;
     if (indexRef.current >= results.length) return;
 
     isPlayingRef.current = true;
-
     const index = indexRef.current;
     const item = results[index];
 
@@ -112,18 +138,11 @@ export const useKittenSound = ({
     setProgress(0);
 
     try {
-      if (item.path) {
-        const ok = await playOne(item.path);
-        setKittenSoundResult(r => [
-          ...r,
-          { index: item.index, played: ok, sentence: item.sentence },
-        ]);
-      } else {
-        setKittenSoundResult(r => [
-          ...r,
-          { index: item.index, played: false, sentence: item.sentence },
-        ]);
-      }
+      const ok = item.path ? await playOne(item.path) : false;
+      setKittenSoundResult(r => [
+        ...r,
+        { index: item.index, played: ok, sentence: item.sentence },
+      ]);
     } finally {
       indexRef.current = index + 1;
       isPlayingRef.current = false;
@@ -135,43 +154,91 @@ export const useKittenSound = ({
     processNext();
   }, [kittenResult, processNext]);
 
-  const stop = useCallback(() => {
-    clearTimer();
-    if (soundRef.current) {
-      soundRef.current.stop(() => {
-        soundRef.current?.release();
-        soundRef.current = null;
-      });
+  // --- Goal 2: pause / resume + system interruption events ---
+  const pause = useCallback(async () => {
+    const ctx = ctxRef.current;
+    if (ctx && ctx.state === 'running') {
+      await ctx.suspend();
+      setIsPlaying(false);
+      setIsPaused(true);
     }
+  }, []);
+
+  const resume = useCallback(async () => {
+    const ctx = ctxRef.current;
+    if (ctx && ctx.state === 'suspended') {
+      await ctx.resume();
+      setIsPlaying(true);
+      setIsPaused(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    AudioManager.observeAudioInterruptions(true);
+    const sub = AudioManager.addSystemEventListener(
+      'interruption',
+      (e: any) => {
+        if (e?.type === 'began') {
+          pause(); // suspends + flips isPaused => your Continue button shows
+        }
+        // on 'ended' we intentionally DO NOT auto-resume — user taps Continue.
+      },
+    );
+    return () => sub?.remove();
+  }, [pause]);
+
+  const stop = useCallback(() => {
+    manualStopRef.current = true;
+    clearTimer();
+    const source = sourceRef.current;
+    if (source) {
+      try {
+        source.stop();
+      } catch {}
+      sourceRef.current = null;
+    }
+    setIsPlaying(false);
   }, [clearTimer]);
 
   useEffect(() => {
-    if (stopped) {
-      stop();
-    }
+    if (stopped) stop();
   }, [stop, stopped]);
 
-  // Release on unmount so we don't leak a Sound instance.
-  useEffect(() => {
-    return () => {
-      clearTimer();
-      soundRef.current?.release();
-      soundRef.current = null;
-    };
-  }, [clearTimer]);
-
+  // reset (keep the shared context alive — it's the expensive object)
   useEffect(() => {
     clearTimer();
-    soundRef.current?.release();
-    soundRef.current = null;
-
+    const source = sourceRef.current;
+    if (source) {
+      try {
+        source.stop();
+      } catch {}
+      sourceRef.current = null;
+    }
     setProgress(0);
     setDuration(0);
     setPlayingIndex(0);
+    setIsPlaying(false);
+    setIsPaused(false);
     setKittenSoundResult([]);
     indexRef.current = 0;
     isPlayingRef.current = false;
   }, [resetTrigger, clearTimer]);
+
+  // close the context only on unmount
+  useEffect(() => {
+    return () => {
+      clearTimer();
+      const source = sourceRef.current;
+      if (source) {
+        try {
+          source.stop();
+        } catch {}
+        sourceRef.current = null;
+      }
+      ctxRef.current?.close();
+      ctxRef.current = null;
+    };
+  }, [clearTimer]);
 
   return {
     kittenSoundResult,
@@ -179,6 +246,9 @@ export const useKittenSound = ({
     soundProgress: progress,
     soundDuration: duration,
     isPlaying,
+    isPaused, // new
+    pause, // new
+    resume, // new (wire your Continue button here)
     stop,
   };
 };

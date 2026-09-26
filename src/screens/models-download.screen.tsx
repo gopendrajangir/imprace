@@ -218,17 +218,32 @@ export const ModelsDownloadScreen: React.FC<Props> = () => {
 
       <View style={styles.footer}>
         {allReady && (
-          <Button
-            mode="contained"
-            icon="check"
-            buttonColor={theme.teal}
-            textColor={theme.onInverse}
-            style={styles.cta}
-            labelStyle={styles.ctaLabel}
-            onPress={handleContinue}
-          >
-            You're all set — Continue
-          </Button>
+          <>
+            <Button
+              mode="contained"
+              icon="check"
+              buttonColor={theme.teal}
+              textColor={theme.onInverse}
+              style={styles.cta}
+              labelStyle={styles.ctaLabel}
+              onPress={handleContinue}
+            >
+              You're all set — Continue
+            </Button>
+            {/* <Button
+              mode="contained"
+              icon="check"
+              buttonColor={theme.gold}
+              textColor={theme.textPrimary}
+              style={[styles.cta, { marginTop: 10 }]}
+              labelStyle={styles.ctaLabel}
+              onPress={() => {
+                navigation.navigate('Profiler');
+              }}
+            >
+              Go to Profiler
+            </Button> */}
+          </>
         )}
         {isDownloading && (
           <>

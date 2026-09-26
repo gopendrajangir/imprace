@@ -29,10 +29,12 @@ export const useInterviewFlow = (stopped: boolean) => {
 
   const {
     isPlaying,
+    isPaused,
     kittenSoundResult,
     playingIndex,
     soundProgress,
     soundDuration,
+    resume,
   } = useKittenSound({
     kittenResult,
     resetTrigger: conversationVersion,
@@ -127,6 +129,7 @@ export const useInterviewFlow = (stopped: boolean) => {
     kittenResult,
     kittenSoundResult,
     isPlaying,
+    isPaused,
     isRecordingIdle,
     isManualRecording,
     isInterviewerSpeaking,
@@ -141,5 +144,6 @@ export const useInterviewFlow = (stopped: boolean) => {
     setIsManualRecording,
     startRecording,
     stopRecording,
+    resume,
   };
 };

@@ -12,6 +12,7 @@
 		4D4184C3021ACC24B52502AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		C26FB2A63066D5A5005BF465 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C26FB2A53066D5A5005BF465 /* SceneDelegate.swift */; };
 		C2D17304305A16ED00BD5144 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = C2D17303305A16E600BD5144 /* assets */; };
 		C2E9D824303D0D8600571FBF /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C24531D6303D0925007C2FC0 /* AVFoundation.framework */; };
 /* End PBXBuildFile section */
@@ -26,6 +27,7 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Imprace/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C24531D6303D0925007C2FC0 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		C24531DB303D097D007C2FC0 /* AVFAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFAudio.framework; path = System/Library/Frameworks/AVFAudio.framework; sourceTree = SDKROOT; };
+		C26FB2A53066D5A5005BF465 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		C2D17303305A16E600BD5144 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		E262F1379C61D3312B331510 /* Pods-Imprace.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Imprace.debug.xcconfig"; path = "Target Support Files/Pods-Imprace/Pods-Imprace.debug.xcconfig"; sourceTree = "<group>"; };
 		E46768A881EE749650A7FC1D /* libPods-Imprace.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Imprace.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -48,6 +50,7 @@
 		13B07FAE1A68108700A75B9A /* Imprace */ = {
 			isa = PBXGroup;
 			children = (
+				C26FB2A53066D5A5005BF465 /* SceneDelegate.swift */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
@@ -201,9 +204,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Imprace/Pods-Imprace-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Imprace/Pods-Imprace-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -240,9 +247,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Imprace/Pods-Imprace-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Imprace/Pods-Imprace-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -257,6 +268,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				C26FB2A63066D5A5005BF465 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,7 +281,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = A8D5FS3PU5;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = (
@@ -399,7 +411,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = A8D5FS3PU5;
 				INFOPLIST_FILE = Imprace/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Imprace;

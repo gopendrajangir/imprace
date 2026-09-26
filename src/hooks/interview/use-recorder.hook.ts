@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Sound from 'react-native-sound';
 import LiveAudioStream from 'react-native-live-audio-stream';
-import { NitroFilesAPI, NitroWhisperML } from 'react-native-akki-ai';
+import { NitroWhisperML } from 'react-native-akki-ai';
 
 import { decodeBase64PCM16ToFloat32 } from '@/utils';
 import { RECORDING_SAMPLE_RATE } from '@/constants';
@@ -9,8 +9,6 @@ import { useSharedValue } from 'react-native-worklets-core';
 import { usePermissions } from '../use-permissions.hook';
 
 const RECORDING_IDLE_DURATION = 5000;
-
-Sound.setCategory('PlayAndRecord');
 
 type RecordingStatus = 'idle' | 'recording' | 'finished' | 'failed';
 
@@ -103,22 +101,22 @@ export const useRecorder = ({
   }, []);
 
   /** Plays the current take back. Rejects if WAV encode/playback fails. */
-  const playRecording = useCallback(async () => {
-    let wavPath = NitroFilesAPI.floatBufferToWav(
-      new Float32Array(lastTakeRef.current).buffer,
-      RECORDING_SAMPLE_RATE,
-    );
+  // const playRecording = useCallback(async () => {
+  //   let wavPath = NitroFilesAPI.floatBufferToWav(
+  //     new Float32Array(lastTakeRef.current).buffer,
+  //     RECORDING_SAMPLE_RATE,
+  //   );
 
-    const sound = new Sound(wavPath, '', err => {
-      if (!err) {
-        currentSoundRef.current = sound;
-        sound.play(() => {
-          sound.release();
-          currentSoundRef.current = null;
-        });
-      }
-    });
-  }, []);
+  //   const sound = new Sound(wavPath, '', err => {
+  //     if (!err) {
+  //       currentSoundRef.current = sound;
+  //       sound.play(() => {
+  //         sound.release();
+  //         currentSoundRef.current = null;
+  //       });
+  //     }
+  //   });
+  // }, []);
 
   const getRecordingSamples = useCallback(() => lastTakeRef.current, []);
 
@@ -248,7 +246,7 @@ export const useRecorder = ({
     isRecordingIdle,
     startRecording,
     stopRecording,
-    playRecording,
+    // playRecording,
     getRecordingSamples,
   };
 };
