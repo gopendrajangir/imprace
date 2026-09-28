@@ -28,8 +28,4 @@ The whole voice loop runs locally through a shared C++ [Nitro](https://nitro.mar
 
 ## Status
 
-Active development. See open issues for current work.
-
-## License
-
-TBD
+Active development
